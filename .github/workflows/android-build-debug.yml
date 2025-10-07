@@ -28,12 +28,10 @@ jobs:
           mkdir -p $HOME/android-sdk/cmdline-tools
           cd $HOME/android-sdk/cmdline-tools
 
-          # Загружаем инструменты
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O cmdline-tools.zip
           unzip -q cmdline-tools.zip
           rm cmdline-tools.zip
 
-          # Перемещаем в нужную структуру
           mv cmdline-tools latest
 
           export ANDROID_SDK_ROOT=$HOME/android-sdk
@@ -43,12 +41,8 @@ jobs:
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
 
-          # Принимаем лицензии и ставим нужные платформы
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-
-      - name: Install Gradle
-        uses: gradle/gradle-build-action@v3
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -60,19 +54,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Generate Gradle Wrapper if missing
-        run: |
-          if [ ! -f "./gradlew" ]; then
-            echo "Gradle wrapper not found, generating..."
-            gradle wrapper
-          else
-            echo "Gradle wrapper already exists."
-          fi
-
       - name: Build APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
