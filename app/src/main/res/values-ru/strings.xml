@@ -1,1 +1,13 @@
-
+<resources>
+    <string name="app_name">PS4 Эксплойты</string>
+    <string name="menu_title">Оглавление</string>
+    <string name="theme_label">Тема</string>
+    <string name="translation_label">Перевод</string>
+    <string name="language_label">Интерфейс</string>
+    <string name="lang_en">Английский</string>
+    <string name="lang_ru">Русский</string>
+    <string name="dir_en_ru">Англ → Рус</string>
+    <string name="dir_ru_en">Рус → Англ</string>
+    <string name="section_not_found">Секция не найдена</string>
+    <string name="scroll_to">Переход к %1$s</string>
+</resources>
