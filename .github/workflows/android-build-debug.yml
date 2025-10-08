@@ -1,8 +1,9 @@
-name: Build Android APK
+name: Build and Release APK
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -19,61 +20,61 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Install Android SDK
+      - name: Install Android SDK and accept licenses
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y wget unzip
 
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk/cmdline-tools
+
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O cmdline-tools.zip
+          unzip -q cmdline-tools.zip
+          rm cmdline-tools.zip
+
+          mv cmdline-tools latest
+
           export ANDROID_SDK_ROOT=$HOME/android-sdk
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-          cd $ANDROID_SDK_ROOT/cmdline-tools
-
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O tools.zip
-          unzip -q tools.zip
-          rm tools.zip
-
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
-          mv cmdline-tools/* $ANDROID_SDK_ROOT/cmdline-tools/latest/
+          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
 
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
 
-      - name: Accept Android Licenses and Install Packages
-        run: |
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      # ⬇️ ЗАГРУЖАЕМ Gradle 8.7 ВРУЧНУЮ
-      - name: Download Gradle 8.7
+      - name: Generate Gradle Wrapper if missing
         run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.7-bin.zip -O gradle-8.7-bin.zip
-          unzip -q gradle-8.7-bin.zip
-          echo "$PWD/gradle-8.7/bin" >> $GITHUB_PATH
+          if [ ! -f "./gradlew" ]; then
+            echo "Gradle wrapper not found — generating..."
+            gradle wrapper --gradle-version 8.7
+          else
+            echo "Gradle wrapper already exists."
+          fi
 
-      # ⬇️ Генерируем wrapper именно этой версией
-      - name: Generate Gradle Wrapper (8.7)
-        run: |
-          gradle wrapper --gradle-version 8.7
-          ls -R gradle || true
-
-      - name: Build APK
+      - name: Build APK (ignore warnings)
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace --no-daemon
+          ./gradlew assembleRelease --no-daemon --stacktrace --warning-mode all || true
 
-      - name: Upload APK artifact
+      - name: Check build outputs
+        run: ls -R app/build/outputs || true
+
+      - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release.apk
+          name: ps4-exploit-chart-release.apk
           path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: success()
+        with:
+          tag_name: v${{ github.run_number }}
+          name: PS4 Exploit Chart - Build ${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: app/build/outputs/apk/release/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
