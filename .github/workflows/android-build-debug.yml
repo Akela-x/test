@@ -44,11 +44,16 @@ jobs:
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
-      - name: Generate Gradle Wrapper if missing
+      - name: Generate Gradle Wrapper if missing (from app module)
         run: |
           if [ ! -f "./gradlew" ]; then
-            echo "Gradle wrapper not found — generating..."
+            echo "Gradle wrapper not found — generating from app module..."
+            cd app
             gradle wrapper --gradle-version 8.7
+            mv gradlew gradlew.bat ../
+            mkdir -p ../gradle/wrapper
+            mv gradle/wrapper/* ../gradle/wrapper/
+            cd ..
           else
             echo "Gradle wrapper already exists."
           fi
