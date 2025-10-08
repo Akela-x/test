@@ -28,12 +28,10 @@ jobs:
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
           cd $ANDROID_SDK_ROOT/cmdline-tools
 
-          # Загружаем инструменты
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O tools.zip
           unzip -q tools.zip
           rm tools.zip
 
-          # Разворачиваем корректную структуру SDK
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
           mv cmdline-tools/* $ANDROID_SDK_ROOT/cmdline-tools/latest/
 
@@ -56,18 +54,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # ⬇️ Новый шаг — создаёт Gradle Wrapper с jar и properties
-      - name: Generate Gradle Wrapper (force)
+      # 🧩 Создаём wrapper с Gradle 8.7 (совместимым)
+      - name: Generate Gradle Wrapper (Gradle 8.7)
         run: |
-          echo "Generating Gradle wrapper..."
           gradle wrapper --gradle-version 8.7
           ls -R gradle || true
 
       - name: Build APK
         run: |
           chmod +x gradlew
-          ./gradlew wrapper --gradle-version 8.7
-          ./gradlew assembleRelease --stacktrace
+          ./gradlew assembleRelease --stacktrace --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
