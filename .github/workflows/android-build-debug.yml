@@ -54,8 +54,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 🧩 Создаём wrapper с Gradle 8.7 (совместимым)
-      - name: Generate Gradle Wrapper (Gradle 8.7)
+      # ⬇️ ЗАГРУЖАЕМ Gradle 8.7 ВРУЧНУЮ
+      - name: Download Gradle 8.7
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.7-bin.zip -O gradle-8.7-bin.zip
+          unzip -q gradle-8.7-bin.zip
+          echo "$PWD/gradle-8.7/bin" >> $GITHUB_PATH
+
+      # ⬇️ Генерируем wrapper именно этой версией
+      - name: Generate Gradle Wrapper (8.7)
         run: |
           gradle wrapper --gradle-version 8.7
           ls -R gradle || true
