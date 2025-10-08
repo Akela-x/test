@@ -20,48 +20,44 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Install Android SDK and accept licenses
+      # Используем уже предустановленный SDK
+      - name: Configure Android SDK
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y wget unzip
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "✅ Using built-in Android SDK at $ANDROID_HOME"
 
-          # Создаём директорию SDK
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk/cmdline-tools
-
-          # Загружаем инструменты
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
-          unzip -q tools.zip -d $HOME/android-sdk/cmdline-tools
-          rm tools.zip
-
-          # Исправляем структуру SDK, чтобы sdkmanager был доступен
-          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-
-          # Добавляем в PATH
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
-
-          # Проверяем sdkmanager
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --version
-
-          # Принимаем лицензии и ставим нужные платформы
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-
+      # Настраиваем Gradle
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.7
 
-      - name: Build APK
-        run: gradle assembleRelease --no-daemon --stacktrace --warning-mode all
+      # Проверка наличия gradlew
+      - name: Generate Gradle Wrapper if missing
+        run: |
+          if [ ! -f "./gradlew" ]; then
+            echo "Gradle wrapper not found — generating..."
+            gradle wrapper --gradle-version 8.7
+          else
+            echo "Gradle wrapper already exists."
+          fi
 
-      - name: Check build outputs
+      # Сборка
+      - name: Build APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace --warning-mode all
+
+      # Проверяем выходные файлы
+      - name: Check outputs
         run: ls -R app/build/outputs || true
 
-      - name: Upload APK artifact
+      # Загружаем apk
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ps4-exploit-chart-release.apk
+          name: app-release.apk
           path: app/build/outputs/apk/release/app-release.apk
