@@ -18,6 +18,8 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -25,14 +27,17 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
 
-    splits {
-        abi {
-            enable false
-        }
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.5.2'
     }
 }
 
@@ -42,8 +47,11 @@ repositories {
 }
 
 dependencies {
+    // ✅ Исправление ошибки с темой
+    implementation 'com.google.android.material:material:1.10.0'
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.20"
-    implementation "androidx.core:core-ktx:1.11.0"
+    implementation "androidx.core:core-ktx:1.12.0"
     implementation "androidx.activity:activity-compose:1.8.0"
     implementation "androidx.compose.ui:ui:1.6.0"
     implementation "androidx.compose.material:material:1.6.0"
@@ -53,8 +61,8 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.11.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
     implementation "io.coil-kt:coil-compose:2.4.0"
-    
-    // ⚡ Исправлено — стабильная версия ML Kit
+
+    // ✅ ML Kit (проверенные стабильные версии)
     implementation 'com.google.mlkit:translate:17.0.2'
     implementation 'com.google.mlkit:common:17.1.0'
 }
