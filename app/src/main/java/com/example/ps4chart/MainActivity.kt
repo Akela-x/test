@@ -25,6 +25,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        vm.onCleared()
+        // ❌ нельзя вызывать onCleared()
+        translatorHelper.close()
     }
 }
