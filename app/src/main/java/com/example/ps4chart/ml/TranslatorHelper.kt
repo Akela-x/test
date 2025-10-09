@@ -14,7 +14,7 @@ class TranslatorHelper {
     private var translatorRUtoEN: Translator? = null
 
     private fun getOptions(dir: TranslateDirection): TranslatorOptions =
-        when(dir) {
+        when (dir) {
             TranslateDirection.EN_TO_RU -> TranslatorOptions.Builder()
                 .setSourceLanguage(TranslateLanguage.ENGLISH)
                 .setTargetLanguage(TranslateLanguage.RUSSIAN)
@@ -25,27 +25,20 @@ class TranslatorHelper {
                 .build()
         }
 
-    fun getTranslator(dir: TranslateDirection): Translator {
-        return when (dir) {
-            TranslateDirection.EN_TO_RU -> {
-                if (translatorENtoRU == null) translatorENtoRU = Translation.getClient(getOptions(dir))
-                translatorENtoRU!!
-            }
-            TranslateDirection.RU_TO_EN -> {
-                if (translatorRUtoEN == null) translatorRUtoEN = Translation.getClient(getOptions(dir))
-                translatorRUtoEN!!
-            }
+    private fun getTranslator(dir: TranslateDirection): Translator =
+        when (dir) {
+            TranslateDirection.EN_TO_RU -> translatorENtoRU
+                ?: Translation.getClient(getOptions(dir)).also { translatorENtoRU = it }
+            TranslateDirection.RU_TO_EN -> translatorRUtoEN
+                ?: Translation.getClient(getOptions(dir)).also { translatorRUtoEN = it }
         }
-    }
 
     suspend fun ensureModelDownloaded(dir: TranslateDirection) {
-        val t = getTranslator(dir)
-        t.downloadModelIfNeeded().await()
+        getTranslator(dir).downloadModelIfNeeded().await()
     }
 
     suspend fun translate(text: String, dir: TranslateDirection): String {
-        val t = getTranslator(dir)
-        return t.translate(text).await()
+        return getTranslator(dir).translate(text).await()
     }
 
     fun close() {
