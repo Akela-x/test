@@ -36,7 +36,7 @@ android {
         compose true
     }
 
-    // ✅ Совместимая версия Compose Compiler и Kotlin
+    // ✅ Compose compiler совместим с Kotlin 1.9.24
     composeOptions {
         kotlinCompilerExtensionVersion '1.5.14'
     }
@@ -59,31 +59,35 @@ repositories {
 }
 
 dependencies {
-    // ✅ Kotlin и базовые Android компоненты
+    // ✅ Kotlin и Android core
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.24"
     implementation "androidx.core:core-ktx:1.13.1"
     implementation "androidx.activity:activity-compose:1.9.2"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.8.6"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6"
 
-    // ✅ Jetpack Compose (совместим с Kotlin 1.9.24)
+    // ✅ Compose UI
     implementation "androidx.compose.ui:ui:1.6.8"
     implementation "androidx.compose.material:material:1.6.8"
     implementation "androidx.compose.ui:ui-tooling-preview:1.6.8"
     debugImplementation "androidx.compose.ui:ui-tooling:1.6.8"
     debugImplementation "androidx.compose.ui:ui-test-manifest:1.6.8"
 
-    // ✅ Материальные компоненты
+    // ✅ Материальные компоненты (Material Design)
     implementation "com.google.android.material:material:1.12.0"
 
-    // ✅ Работа с сетью, HTML, изображениями
+    // ✅ Работа с сетью и HTML
     implementation "org.jsoup:jsoup:1.17.2"
     implementation "com.squareup.okhttp3:okhttp:4.12.0"
+
+    // ✅ Коррутины (включая Play Services для await)
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1"
+
+    // ✅ Загрузка изображений
     implementation "io.coil-kt:coil-compose:2.6.0"
 
-    // ✅ ML Kit (переводчик)
+    // ✅ ML Kit — переводчик
     implementation 'com.google.mlkit:translate:17.0.2'
     implementation 'com.google.mlkit:common:17.1.0'
 }
