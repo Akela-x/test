@@ -21,13 +21,25 @@ android {
         }
     }
 
-    compileOptions { sourceCompatibility JavaVersion.VERSION_11; targetCompatibility JavaVersion.VERSION_11 }
-    kotlinOptions { jvmTarget = "11" }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 
-    splits { abi { enable false } }
+    splits {
+        abi {
+            enable false
+        }
+    }
 }
 
-repositories { mavenCentral(); google() }
+repositories {
+    google()
+    mavenCentral()
+}
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.20"
@@ -41,6 +53,8 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.11.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
     implementation "io.coil-kt:coil-compose:2.4.0"
-    implementation 'com.google.mlkit:translate:17.1.2'
+    
+    // ⚡ Исправлено — стабильная версия ML Kit
+    implementation 'com.google.mlkit:translate:17.0.2'
     implementation 'com.google.mlkit:common:17.1.0'
 }
